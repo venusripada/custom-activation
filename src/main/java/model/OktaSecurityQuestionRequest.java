@@ -7,6 +7,7 @@ package model;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.util.MultiValueMap;
 
 /**
  *
@@ -15,12 +16,21 @@ import java.util.Map;
 public class OktaSecurityQuestionRequest {
     private Map<String, Object> credentials;
     
-    public OktaSecurityQuestionRequest(String question, String answer){
+    public OktaSecurityQuestionRequest(MultiValueMap<String, String> paramMap){
+        
+        String question = paramMap.get("securityQuestion") != null
+                ? paramMap.get("securityQuestion").toArray()[0].toString()
+                : null;
+        String answer = paramMap.get("securityQuestionAnswer") != null
+                ? paramMap.get("securityQuestionAnswer").toArray()[0].toString()
+                : null;
+        
         Map <String, String> recoveryQuestion = new HashMap<>();
         recoveryQuestion.put("question", question);
         recoveryQuestion.put("answer", answer);
         
-        credentials.put("recovery_question", recoveryQuestion);
+        this.credentials = new HashMap();
+        this.credentials.put("recovery_question", recoveryQuestion);
     }
 
     public Map<String, Object> getCredentials() {

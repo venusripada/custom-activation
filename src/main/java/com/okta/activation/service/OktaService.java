@@ -5,16 +5,19 @@
  */
 package com.okta.activation.service;
 
+import com.okta.activation.config.YAMLConfiguration;
+
 import model.OktaPasswordRequest;
 import model.OktaSecurityQuestionRequest;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-
+import model.SecurityQuestionResponse;
 import model.TokenRequest;
 import model.TokenResponse;
-import org.springframework.http.HttpStatus;
+
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Mono;
 
 /**
@@ -24,43 +27,55 @@ import reactor.core.publisher.Mono;
 @Service
 public class OktaService {
     
-    private WebClient client = WebClient.create("https://venuokta.oktapreview.com");
+    
+    private YAMLConfiguration config;
+    
+    private WebClient client;
+    
+    @Autowired
+    public OktaService(YAMLConfiguration config){
+       this.config = config;
+       client =  WebClient.create(config.getOktaBaseUrl());
+ 
+    }
+    
     public Mono<TokenResponse> validateToken(TokenRequest token) {
-       
-       Mono<TokenResponse> response =  client.post()
+
+        Mono<TokenResponse> response = client.post()
                 .uri("/api/v1/authn")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(token), TokenRequest.class)
                 .retrieve()
                 .bodyToMono(TokenResponse.class);
-       
-       return response;
-                  
+
+        return response;
+
     }
-    
+
     public Mono<TokenResponse> setPassword(OktaPasswordRequest passwordRequest) {
-       
-       Mono<TokenResponse> response =  client.post()
+
+        Mono<TokenResponse> response = client.post()
                 .uri("/api/v1/authn/credentials/reset_password")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(passwordRequest), OktaPasswordRequest.class)
                 .retrieve()
                 .bodyToMono(TokenResponse.class);
- 
-       return response;
-                  
+
+        return response;
+
     }
-    
-    public Mono<TokenResponse> setRecoveryQuestion(OktaSecurityQuestionRequest securityQuestionRequest) {
-       
-       Mono<TokenResponse> response =  client.put()
-                .uri("/api/v1/authn/credentials/reset_password")
+
+    public Mono<SecurityQuestionResponse> setRecoveryQuestion(String userId, OktaSecurityQuestionRequest securityQuestionRequest) {
+
+        Mono<SecurityQuestionResponse> response = client.put()
+                .uri(String.format("/api/v1/users/%s", userId))
                 .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(securityQuestionRequest), OktaPasswordRequest.class)
+                .header("Authorization", String.format("SSWS %s", config.getOktaAPIKey()))
+                .body(Mono.just(securityQuestionRequest), OktaSecurityQuestionRequest.class)
                 .retrieve()
-                .bodyToMono(TokenResponse.class);
- 
-       return response;
-                  
+                .bodyToMono(SecurityQuestionResponse.class);
+
+        return response;
+
     }
 }
