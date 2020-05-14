@@ -1,30 +1,30 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 
-<!DOCTYPE html>
-<html lang="en" >
+<html xmlns:th="http://www.w3.org/1999/xhtml"  lang="en" >
     <head>
         <meta charset="UTF-8">
         <title>Activate User</title>
-        <c:set var="context" value="${pageContext.request.contextPath}" />
 
-        <link rel="stylesheet" href="${context}/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css">
-        <link rel="stylesheet" href="${context}/style.css">
-        <script> let appPayload = ${response} </script>
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css}">
+        <link rel="stylesheet" th:href="@{/style.css}">
+        <script th:inline="javascript"> 
+            /*<![CDATA[*/
+                let appPayload = /*[[${response}]]*/ 
+            /*]]>*/
+            </script>
     </head>
     <body>
 
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
-                    <form class="form-horizontal mar-top-bot-50" id="validateForm" method="post" action="${context}/createUser">
+                    <form class="form-horizontal mar-top-bot-50" id="validateForm" method="post" th:action="@{/createUser}">
                         <h1>Choose Password</h1>
                         <fieldset>
                             <!-- Password input-->
                             <div class="form-group">
                                 <label class="col-md-12 control-label" for="passwordinput">Password <span id="popover-password-top" class="hide pull-right block-help"><i class="fa fa-info-circle text-danger" aria-hidden="true"></i> Enter a strong password</span></label>
                                 <div class="col-md-12">
-                                    <input id="password" name="password" type="password" placeholder="" class="form-control input-md" data-placement="bottom" data-toggle="popover" data-container="body" type="button" data-html="true">
+                                    <input id="password" name="password" type="password" placeholder="" class="form-control input-md" data-placement="bottom" data-toggle="popover" data-container="body"  data-html="true">
                                     <div id="popover-password">
                                         <p>Password Strength: <span id="result"> </span></p>
                                         <div class="progress">
@@ -65,7 +65,7 @@
                                     <input id="security-answer" name="securityQuestionAnswer"  placeholder="" class="form-control input-md">
                                 </div>
                             </div>
-                             <input id="stateToken" type="hidden" name="stateToken" value="${token}"  placeholder="" class="form-control input-md">
+                             <input id="stateToken" type="hidden" name="stateToken" th:value="${token}"  placeholder="" class="form-control input-md">
                              <button type="submit" id="submit" class="btn btn-primary">Create Account</button>
                         </fieldset>
                     </form>
@@ -74,10 +74,10 @@
         </div>
 
 
-        <script src="${context}/webjars/jquery/1.11.1/jquery.min.js"></script>
-        <script src="${context}/webjars/bootstrap/3.3.7-1/js/bootstrap.min.js"></script>
+        <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+        <script th:src="@{/webjars/bootstrap/3.3.7-1/js/bootstrap.min.js}"></script>
 
-    </script><script  src="${context}/application.js"></script>
+        <script  th:src="@{/application.js}"></script>
 
 </body>
 </html>

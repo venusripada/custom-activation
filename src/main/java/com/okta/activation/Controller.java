@@ -7,6 +7,7 @@ package com.okta.activation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.okta.activation.config.YAMLConfiguration;
 import com.okta.activation.service.OktaService;
 import java.util.Map;
 import model.OktaPasswordRequest;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -40,6 +42,9 @@ public class Controller {
 
     @Autowired
     private OktaService oktaService;
+    
+    @Autowired
+    private YAMLConfiguration config;
 
     @RequestMapping("/activate/{token}")
     public String activate(Model model, @PathVariable String token) throws JsonProcessingException {
@@ -62,7 +67,7 @@ public class Controller {
             path = "/createUser",
             consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
 
-    public String createUser(Model model, @RequestParam MultiValueMap<String, String> paramMap) throws JsonProcessingException {
+    public ModelAndView createUser(Model model, @RequestParam MultiValueMap<String, String> paramMap) throws JsonProcessingException {
         //TODO validate password, security Question and answer on server side
         //TODO call reset password and use response to call Set recovery question
         
@@ -92,10 +97,7 @@ public class Controller {
             //TODO handle securityQResponse and redirect user back if needed
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        model.addAttribute("response", objectMapper.writeValueAsString(response));
-        model.addAttribute("stateToken", response.getStateToken());
-        return "success";
+        return new ModelAndView(String.format("redirect:%s?stateToken=%s", config.getOktaBaseUrl() ,response.getStateToken()));
     }
 
     @ExceptionHandler(WebClientResponseException.class)
