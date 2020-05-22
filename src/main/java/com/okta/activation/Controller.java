@@ -15,6 +15,7 @@ import model.OktaSecurityQuestionRequest;
 import model.SecurityQuestionResponse;
 import model.TokenResponse;
 import model.TokenRequest;
+import model.ValidateTokenRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,12 +53,13 @@ public class Controller {
         logger.debug("Processing activation token:", token);
 
         TokenResponse response = oktaService.validateToken(
-                new TokenRequest(token))
+                new ValidateTokenRequest(token))
                 .block();
 
         ObjectMapper objectMapper = new ObjectMapper();
         model.addAttribute("response", objectMapper.writeValueAsString(response));
         model.addAttribute("token", response.getStateToken());
+        model.addAttribute("activationToken", token);
         
         logger.debug("Processed activation token:{} and got stateToken: {}", token, response.getStateToken());
         return "activation";
@@ -72,8 +74,15 @@ public class Controller {
         //TODO call reset password and use response to call Set recovery question
         
         logger.info("Received user request to set password");
+        String activationToken =  paramMap.get("activationToken") != null
+                ? paramMap.get("activationToken").toArray()[0].toString()
+                : null;
+         TokenResponse activatedResponse = oktaService.authenticateToken(
+                new TokenRequest(activationToken))
+                .block();
         
         OktaPasswordRequest passwordRequest = new OktaPasswordRequest(paramMap);
+        passwordRequest.setStateToken(activatedResponse.getStateToken());
         TokenResponse response = oktaService.setPassword(passwordRequest)
                 .block();
         

@@ -12,6 +12,7 @@ import model.OktaSecurityQuestionRequest;
 import model.SecurityQuestionResponse;
 import model.TokenRequest;
 import model.TokenResponse;
+import model.ValidateTokenRequest;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,7 +40,20 @@ public class OktaService {
  
     }
     
-    public Mono<TokenResponse> validateToken(TokenRequest token) {
+    public Mono<TokenResponse> validateToken(ValidateTokenRequest token) {
+
+        Mono<TokenResponse> response = client.post()
+                .uri("/api/v1/authn/recovery/token")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(token), ValidateTokenRequest.class)
+                .retrieve()
+                .bodyToMono(TokenResponse.class);
+
+        return response;
+
+    }
+    
+    public Mono<TokenResponse> authenticateToken(TokenRequest token) {
 
         Mono<TokenResponse> response = client.post()
                 .uri("/api/v1/authn")
